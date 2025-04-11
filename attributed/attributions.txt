@@ -1,0 +1,27 @@
+File: Windrose_en.svg
+By <a href="//commons.wikimedia.org/w/index.php?title=User:Vloeck&amp;action=edit&amp;redlink=1" class="new" title="User:Vloeck (page does not exist)">User:Vloeck</a> - Adapted from <span class="mw-default-size" typeof="mw:File"><a href="//commons.wikimedia.org/wiki/File:Windrose.svg" class="mw-file-description"></a></span>, <a href="https://creativecommons.org/licenses/by-sa/3.0" title="Creative Commons Attribution-Share Alike 3.0">CC BY-SA 3.0</a>, <a href="https://commons.wikimedia.org/w/index.php?curid=148344153">Link</a>
+Licensed under:
+CC BY-SA 3.0
+
+Using the design of the internal diamond, pointing to the 8 points of the horizon
+
+
+File: Protractor1.svg
+URL: https://commons.wikimedia.org/wiki/File:Protractor1.svg
+Description	A 360 degrees protractor with graduations in degree
+Date	2 Δεκεμβρίου 2007
+Source	Personal work, based on a public domain licensed file, downloaded from Wikipedia (Image:Protractor.svg)
+Creator:	Georges Khaznadar <georgesk@ofset.org>
+Licensed under:
+1. GNU GPL 1.2 or later
+2.   GNU Free Documentation License, Version 1.2 or any later version published by the Free Software Foundation; with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts. A copy of the license is included in the section entitled GNU Free Documentation License.
+
+Using the SVG design of exploiting the duplication feature
+
+
+File: svg.min.js
+URL: https://svgjs.dev/docs/3.2/acknowledgements-thanks/
+Licensed under:
+SVG.js and its documentation are released under the terms of the MIT License.
+
+Using the features to make an svg interactive

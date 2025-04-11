@@ -1,0 +1,1655 @@
+<!DOCTYPE html>
+<!-- Copyright 2025 Ilias Iliopoulos info@fryktoria.com -->
+<!-- Detailed license info in https://github.com/fryktoria/interactiveMagneticCompassRose -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Compass</title>
+</head>
+<body style="font-family: Verdana, sans-serif;">
+     
+<svg
+   version="1.1"
+   width="505"
+   height="505"
+   viewBox="-252.5 -252.5 505 505"
+   sodipodi:version="0.32"
+   inkscape:version="1.4 (86a8ad7, 2024-10-11)"
+   sodipodi:docname="airportTrafficPatternCompass.svg"
+   inkscape:output_extension="org.inkscape.output.svg.inkscape"
+   id="svg53"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview53"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="25.568317"
+     inkscape:cx="136.36017"
+     inkscape:cy="301.0953"
+     inkscape:window-width="1920"
+     inkscape:window-height="1009"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="buttonLayer"
+     showgrid="false">
+    <inkscape:grid
+       id="grid10"
+       units="px"
+       originx="0"
+       originy="0"
+       spacingx="1"
+       spacingy="1"
+       empcolor="#0099e5"
+       empopacity="0.30196078"
+       color="#0099e5"
+       opacity="0.14902"
+       empspacing="5"
+       enabled="true"
+       visible="false" />
+  </sodipodi:namedview>
+  <style
+     id="style1">
+    /* This is important to avoid the text been selected after several presses of the buttons */
+    text {
+      pointer-events: none;
+      user-select: none;
+    }
+  </style>
+  <script
+     href="svg.min.js"
+     id="script1" />
+  <script
+     id="script6">
+
+
+
+  var arrowNorth = 0;
+  var plateNorth = 0;
+  
+  var arrowPointerAbsolute = 0;
+  var arrowPointerRelative = 0;
+
+  window.onload = function() {
+  
+    resetPlate();
+    resetArrows();    
+    
+  }
+     
+     
+  function rotateArrowLayer(step) {
+
+    SVG('#arrowLayer').animate().rotate(step);
+    //SVG('#arrowLayer').rotate(step);
+    arrowNorth = fixDegrees(arrowNorth + step); 
+   
+    arrowPointerRelative = fixDegrees(arrowNorth - plateNorth);
+    arrowPointerAbsolute = arrowNorth;
+    updateArrowPointerText();
+   
+  }
+
+
+  function rotatePlate(step) {
+
+    SVG('#compassLayer').animate().rotate(step);
+    SVG('#scaleLayer').animate().rotate(step);
+
+    plateNorth = fixDegrees(plateNorth + step);
+    var indicator = fixDegrees(-plateNorth); 
+    
+    updateText('textN', indicator); // N
+    updateText('textNE', (indicator + 45) % 360);    
+    updateText('textE', (indicator + 90) % 360);
+    updateText('textSE', (indicator + 135) % 360);    
+    updateText('textS', (indicator + 180) % 360);
+    updateText('textSW', (indicator + 225) % 360);
+    updateText('textW', (indicator + 270) % 360);
+    updateText('textNW', (indicator + 315) % 360);
+       
+    arrowPointerRelative = fixDegrees(arrowNorth - plateNorth);
+    arrowPointerAbsolute = arrowNorth;    
+    
+    updateArrowPointerText();
+       
+  }
+
+  function updateText(id, txt) {
+
+    /* Inkscape updates the tspan id on save, so we cannot rely on the tspan name.
+       We assume that there is only one tspan within the text element, so we retrieve 
+       the name of the text element, whose id we know and can use as reference
+    */
+    
+    var spanElementId = getTspanId(id);
+    // Zero pad to have always 3 digits and avoid text field alignement issues
+    //spanElementId.textContent = ('000' + txt).substr(-3); // Changed when I needed .5 resolution in a format 000.0
+    spanElementId.textContent = formatNumber(txt);
+  
+  }
+  
+
+function formatNumber(num) {
+    let formatted = num.toFixed(1);
+    while (formatted.length &lt; 5) {
+        formatted = '0' + formatted;
+    }
+    return formatted;
+}
+
+  
+  function getTspanId(textElementId) {
+     var textElement = document.getElementById(textElementId);
+     var tspanElement = textElement.getElementsByTagName('tspan');
+     return tspanElement[0];  
+  }
+
+ 
+  function updateArrowPointerText() {
+    
+    updateText('pointerAbsoluteN',  arrowPointerAbsolute);
+    updateText('pointerAbsoluteS',  ((arrowPointerAbsolute + 180) % 360));
+    
+    updateText('pointerRelativeN',  arrowPointerRelative);
+    updateText('pointerRelativeS',  ((arrowPointerRelative + 180) % 360));  
+  
+  }
+
+ 
+  function resetPlate() {
+  
+    if (plateNorth &lt;= 180) {
+      rotatePlate(-plateNorth);           
+    } else {
+      rotatePlate(360 - plateNorth);
+    }
+    plateNorth = 0; 
+    
+    arrowPointerRelative = fixDegrees(arrowNorth + plateNorth);    
+    arrowPointerAbsolute = arrowNorth;    
+    updateArrowPointerText();
+      
+  }
+
+  
+  function resetArrows() {
+    if (arrowNorth &lt;= 180) {
+      rotateArrowLayer(-arrowNorth);           
+    } else {
+      rotateArrowLayer(360 - arrowNorth);
+    }
+    arrowNorth = 0;  
+
+    arrowPointerRelative = fixDegrees(arrowNorth - plateNorth);    
+    arrowPointerAbsolute = arrowNorth;
+    updateArrowPointerText();
+  
+  }
+
+  
+
+  function fixDegrees(degrees) {
+    if (degrees &lt; 0) return ( 360 + degrees);
+    /* why does it not recognize ge ? I use gt but instead of 360 I use 359 */
+    if (degrees &gt; 359) return ( degrees % 360);
+    return (degrees)
+  }
+
+
+  // Not used. Did not work properly in a previous method.
+  function resetTransformations() {
+    var objects = ['#compassLayer', '#scaleLayer', '#arrowLayer']; // Add all object IDs here
+     objects.forEach(function(id) {
+        var element = SVG(id);
+        element.transform({ rotation: 0 });
+    });    
+    
+  }  
+
+  
+</script>
+  <defs
+     id="defs1">
+    <rect
+       x="129.53532"
+       y="284.10161"
+       width="9.3866171"
+       height="9.3866171"
+       id="rect16" />
+    <rect
+       x="130.16109"
+       y="284.72739"
+       width="8.1350682"
+       height="8.7608426"
+       id="rect15" />
+    <rect
+       x="360.4461"
+       y="284.10161"
+       width="8.7608426"
+       height="9.3866171"
+       id="rect14" />
+    <rect
+       x="256.56753"
+       y="88.859975"
+       width="20.024783"
+       height="10.012392"
+       id="rect13" />
+    <rect
+       x="226.53036"
+       y="88.234201"
+       width="22.527881"
+       height="11.889715"
+       id="rect4" />
+    <rect
+       x="406.12763"
+       y="16.270136"
+       width="85.731103"
+       height="18.773234"
+       id="rect2" />
+    <rect
+       x="16.270136"
+       y="20.024783"
+       width="69.70902"
+       height="12.266781"
+       id="rect1" />
+    <marker
+       style="overflow:visible"
+       id="arrow"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       preserveAspectRatio="xMidYMid">
+      <path
+         style="fill:context-stroke;fill-rule:evenodd;stroke:none"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         transform="scale(-0.5)"
+         id="path6" />
+    </marker>
+    <inkscape:path-effect
+       effect="fill_between_many"
+       method="bsplinespiro"
+       autoreverse="false"
+       close="false"
+       join="false"
+       linkedpaths="#path14,0,1"
+       id="path-effect16"
+       is_visible="true"
+       lpeversion="0" />
+    <inkscape:path-effect
+       effect="powerstroke"
+       message=""
+       id="path-effect15"
+       is_visible="true"
+       lpeversion="1.3"
+       scale_width="1"
+       interpolator_type="CubicBezierJohan"
+       interpolator_beta="0.2"
+       start_linecap_type="zerowidth"
+       end_linecap_type="zerowidth"
+       offset_points="0,18.867925"
+       linejoin_type="extrp_arc"
+       miter_limit="4"
+       not_jump="false"
+       sort_points="true" />
+    <inkscape:path-effect
+       effect="fill_between_many"
+       method="bsplinespiro"
+       autoreverse="false"
+       close="false"
+       join="false"
+       linkedpaths="#path14-5,0,1"
+       id="path-effect16-4"
+       is_visible="true"
+       lpeversion="0" />
+    <inkscape:path-effect
+       effect="powerstroke"
+       message=""
+       id="path-effect15-8"
+       is_visible="true"
+       lpeversion="1.3"
+       scale_width="1"
+       interpolator_type="CubicBezierJohan"
+       interpolator_beta="0.2"
+       start_linecap_type="zerowidth"
+       end_linecap_type="zerowidth"
+       offset_points="0,18.867925"
+       linejoin_type="extrp_arc"
+       miter_limit="4"
+       not_jump="false"
+       sort_points="true" />
+    <marker
+       style="overflow:visible"
+       id="ArrowWideRounded-61"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Wide, rounded arrow"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         style="fill:none;stroke:context-stroke;stroke-width:1;stroke-linecap:round"
+         d="M 3,-3 0,0 3,3"
+         transform="rotate(180,0.125,0)"
+         sodipodi:nodetypes="ccc"
+         id="path2-89" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="ArrowWideRounded-6-2"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Wide, rounded arrow"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         style="fill:none;stroke:context-stroke;stroke-width:1;stroke-linecap:round"
+         d="M 3,-3 0,0 3,3"
+         transform="rotate(180,0.125,0)"
+         sodipodi:nodetypes="ccc"
+         id="path2-8-7" />
+    </marker>
+    <inkscape:path-effect
+       effect="fill_between_many"
+       method="bsplinespiro"
+       autoreverse="false"
+       close="false"
+       join="false"
+       linkedpaths="#path14-6,0,1"
+       id="path-effect16-7"
+       is_visible="true"
+       lpeversion="0" />
+    <inkscape:path-effect
+       effect="powerstroke"
+       message=""
+       id="path-effect15-1"
+       is_visible="true"
+       lpeversion="1.3"
+       scale_width="1"
+       interpolator_type="CubicBezierJohan"
+       interpolator_beta="0.2"
+       start_linecap_type="zerowidth"
+       end_linecap_type="zerowidth"
+       offset_points="0,18.867925"
+       linejoin_type="extrp_arc"
+       miter_limit="4"
+       not_jump="false"
+       sort_points="true" />
+    <inkscape:path-effect
+       effect="fill_between_many"
+       method="bsplinespiro"
+       autoreverse="false"
+       close="false"
+       join="false"
+       linkedpaths="#path14-6-4,0,1"
+       id="path-effect16-7-0"
+       is_visible="true"
+       lpeversion="0" />
+    <inkscape:path-effect
+       effect="powerstroke"
+       message=""
+       id="path-effect15-1-9"
+       is_visible="true"
+       lpeversion="1.3"
+       scale_width="1"
+       interpolator_type="CubicBezierJohan"
+       interpolator_beta="0.2"
+       start_linecap_type="zerowidth"
+       end_linecap_type="zerowidth"
+       offset_points="0,18.867925"
+       linejoin_type="extrp_arc"
+       miter_limit="4"
+       not_jump="false"
+       sort_points="true" />
+    <marker
+       style="overflow:visible"
+       id="ArrowWideRounded-61-0"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Wide, rounded arrow"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         style="fill:none;stroke:context-stroke;stroke-width:1;stroke-linecap:round"
+         d="M 3,-3 0,0 3,3"
+         transform="rotate(180,0.125,0)"
+         sodipodi:nodetypes="ccc"
+         id="path2-89-9" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="ArrowWideRounded-6-2-4"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Wide, rounded arrow"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         style="fill:none;stroke:context-stroke;stroke-width:1;stroke-linecap:round"
+         d="M 3,-3 0,0 3,3"
+         transform="rotate(180,0.125,0)"
+         sodipodi:nodetypes="ccc"
+         id="path2-8-7-8" />
+    </marker>
+    <rect
+       x="519.75061"
+       y="15.581389"
+       width="71.917956"
+       height="20.108835"
+       id="rect3" />
+    <rect
+       x="519.75061"
+       y="15.581389"
+       width="55.64782"
+       height="34.501648"
+       id="rect3-7" />
+    <rect
+       x="519.75061"
+       y="15.581389"
+       width="55.64782"
+       height="34.501648"
+       id="rect3-5" />
+    <rect
+       x="519.75061"
+       y="15.581389"
+       width="55.64782"
+       height="34.501648"
+       id="rect3-57" />
+    <rect
+       x="519.75061"
+       y="15.581389"
+       width="55.64782"
+       height="34.501648"
+       id="rect3-0" />
+    <rect
+       x="519.75061"
+       y="15.581389"
+       width="55.64782"
+       height="34.501648"
+       id="rect3-0-6" />
+    <rect
+       x="519.75061"
+       y="15.581389"
+       width="55.64782"
+       height="34.501648"
+       id="rect3-2" />
+    <rect
+       x="519.75061"
+       y="15.581389"
+       width="55.64782"
+       height="34.501648"
+       id="rect3-8" />
+    <rect
+       x="519.75061"
+       y="15.581389"
+       width="55.64782"
+       height="34.501648"
+       id="rect3-1" />
+    <inkscape:path-effect
+       effect="fill_between_many"
+       method="bsplinespiro"
+       autoreverse="false"
+       close="false"
+       join="false"
+       linkedpaths="#path14-5-4,0,1"
+       id="path-effect16-4-9"
+       is_visible="true"
+       lpeversion="0" />
+    <inkscape:path-effect
+       effect="powerstroke"
+       message=""
+       id="path-effect15-8-4"
+       is_visible="true"
+       lpeversion="1.3"
+       scale_width="1"
+       interpolator_type="CubicBezierJohan"
+       interpolator_beta="0.2"
+       start_linecap_type="zerowidth"
+       end_linecap_type="zerowidth"
+       offset_points="0,18.867925"
+       linejoin_type="extrp_arc"
+       miter_limit="4"
+       not_jump="false"
+       sort_points="true" />
+    <marker
+       style="overflow:visible"
+       id="ArrowWideRounded-61-0-5"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Wide, rounded arrow"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         style="fill:none;stroke:context-stroke;stroke-width:1;stroke-linecap:round"
+         d="M 3,-3 0,0 3,3"
+         transform="rotate(180,0.125,0)"
+         sodipodi:nodetypes="ccc"
+         id="path2-89-9-1" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="ArrowWideRounded-6-2-4-7"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Wide, rounded arrow"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         style="fill:none;stroke:context-stroke;stroke-width:1;stroke-linecap:round"
+         d="M 3,-3 0,0 3,3"
+         transform="rotate(180,0.125,0)"
+         sodipodi:nodetypes="ccc"
+         id="path2-8-7-8-1" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="ArrowWideRounded-61-4"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Wide, rounded arrow"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         style="fill:none;stroke:context-stroke;stroke-width:1;stroke-linecap:round"
+         d="M 3,-3 0,0 3,3"
+         transform="rotate(180,0.125,0)"
+         sodipodi:nodetypes="ccc"
+         id="path2-89-2" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="ArrowWideRounded-6-2-3"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Wide, rounded arrow"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         style="fill:none;stroke:context-stroke;stroke-width:1;stroke-linecap:round"
+         d="M 3,-3 0,0 3,3"
+         transform="rotate(180,0.125,0)"
+         sodipodi:nodetypes="ccc"
+         id="path2-8-7-2" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="ArrowWideRounded-61-1"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Wide, rounded arrow"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         style="fill:none;stroke:context-stroke;stroke-width:1;stroke-linecap:round"
+         d="M 3,-3 0,0 3,3"
+         transform="rotate(180,0.125,0)"
+         sodipodi:nodetypes="ccc"
+         id="path2-89-8" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="ArrowWideRounded-61-1-3"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Wide, rounded arrow"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         style="fill:none;stroke:context-stroke;stroke-width:1;stroke-linecap:round"
+         d="M 3,-3 0,0 3,3"
+         transform="rotate(180,0.125,0)"
+         sodipodi:nodetypes="ccc"
+         id="path2-89-8-3" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="ArrowWideRounded-61-0-7"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Wide, rounded arrow"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         style="fill:none;stroke:context-stroke;stroke-width:1;stroke-linecap:round"
+         d="M 3,-3 0,0 3,3"
+         transform="rotate(180,0.125,0)"
+         sodipodi:nodetypes="ccc"
+         id="path2-89-9-4" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="ArrowWideRounded-61-0-7-6"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Wide, rounded arrow"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         style="fill:none;stroke:context-stroke;stroke-width:1;stroke-linecap:round"
+         d="M 3,-3 0,0 3,3"
+         transform="rotate(180,0.125,0)"
+         sodipodi:nodetypes="ccc"
+         id="path2-89-9-4-5" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="arrow-9"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       preserveAspectRatio="xMidYMid">
+      <path
+         style="fill:context-stroke;fill-rule:evenodd;stroke:none"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         transform="scale(-0.5)"
+         id="path6-4" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="marker1"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       preserveAspectRatio="xMidYMid">
+      <path
+         style="fill:context-stroke;fill-rule:evenodd;stroke:none"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         transform="scale(-0.5)"
+         id="path1-8" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="ArrowWideRounded-61-1-3-9"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Wide, rounded arrow"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         style="fill:none;stroke:context-stroke;stroke-width:1;stroke-linecap:round"
+         d="M 3,-3 0,0 3,3"
+         transform="rotate(180,0.125,0)"
+         sodipodi:nodetypes="ccc"
+         id="path2-89-8-3-4" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="ArrowWideRounded-61-1-7"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Wide, rounded arrow"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         style="fill:none;stroke:context-stroke;stroke-width:1;stroke-linecap:round"
+         d="M 3,-3 0,0 3,3"
+         transform="rotate(180,0.125,0)"
+         sodipodi:nodetypes="ccc"
+         id="path2-89-8-6" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="ArrowWideRounded-61-0-7-6-1"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Wide, rounded arrow"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         style="fill:none;stroke:context-stroke;stroke-width:1;stroke-linecap:round"
+         d="M 3,-3 0,0 3,3"
+         transform="rotate(180,0.125,0)"
+         sodipodi:nodetypes="ccc"
+         id="path2-89-9-4-5-6" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="ArrowWideRounded-61-0-7-8"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Wide, rounded arrow"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         style="fill:none;stroke:context-stroke;stroke-width:1;stroke-linecap:round"
+         d="M 3,-3 0,0 3,3"
+         transform="rotate(180,0.125,0)"
+         sodipodi:nodetypes="ccc"
+         id="path2-89-9-4-9" />
+    </marker>
+    <rect
+       x="226.53036"
+       y="88.2342"
+       width="22.527882"
+       height="11.889715"
+       id="rect4-9" />
+    <rect
+       x="226.53036"
+       y="88.2342"
+       width="22.527882"
+       height="11.889715"
+       id="rect4-9-2" />
+  </defs>
+  <g
+     fill="none"
+     stroke="#808080"
+     id="arrowLayer"
+     style="display:inline">
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:8px;font-family:'Courier New';-inkscape-font-specification:'Courier New, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;opacity:0.52;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.4;stroke-dasharray:none;stroke-opacity:1"
+       x="-25.703831"
+       y="-167.15781"
+       id="pointerRelativeS"
+       transform="scale(-1)"
+       inkscape:highlight-color="#000000"
+       inkscape:label="pointerRelativeS"><tspan
+         sodipodi:role="line"
+         id="tspan2"
+         x="-25.703831"
+         y="-167.15781">000.0</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:8px;font-family:'Courier New';-inkscape-font-specification:'Courier New, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;opacity:0.52;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.4;stroke-dasharray:none;stroke-opacity:1"
+       x="1.5644279"
+       y="-167.3947"
+       id="pointerAbsoluteS"
+       transform="scale(-1)"
+       inkscape:highlight-color="#000000"
+       inkscape:label="pointerAbsoluteS"><tspan
+         sodipodi:role="line"
+         id="tspan1"
+         x="1.5644279"
+         y="-167.3947">000.0</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:8px;font-family:'Courier New';-inkscape-font-specification:'Courier New, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;white-space:pre;inline-size:54.2598;display:inline;opacity:0.52;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.4;stroke-dasharray:none;stroke-opacity:1"
+       x="1.8302469"
+       y="-164.65469"
+       id="pointerRelativeN"
+       inkscape:highlight-color="#000000"
+       inkscape:label="pointerRelativeN"
+       transform="translate(-28.159851,-1.8773234)"><tspan
+         x="1.8302469"
+         y="-164.65469"
+         id="tspan15">000.0</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:8px;font-family:'Courier New';-inkscape-font-specification:'Courier New, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;white-space:pre;inline-size:62.0462;display:inline;opacity:0.52;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.4;stroke-dasharray:none;stroke-opacity:1"
+       x="-21.589226"
+       y="-164.26581"
+       id="pointerAbsoluteN"
+       inkscape:highlight-color="#000000"
+       inkscape:label="pointerAbsoluteN"
+       transform="translate(25.030979,-1.8773234)"><tspan
+         x="-21.589226"
+         y="-164.26581"
+         id="tspan17">000.0</tspan></text>
+    <path
+       id="arrow-line"
+       d="M -233,0 H 233"
+       style="display:inline;opacity:0.44;fill:#0000ff;stroke:#000000;stroke-width:1;stroke-dasharray:none;marker-start:url(#arrow);marker-end:url(#arrow)" />
+    <use
+       xlink:href="#arrow-line"
+       transform="rotate(45)"
+       id="use16" />
+    <use
+       xlink:href="#arrow-line"
+       transform="rotate(90)"
+       id="use17" />
+    <use
+       xlink:href="#arrow-line"
+       transform="rotate(135)"
+       id="use18" />
+    <circle
+       r="10"
+       id="circle18"
+       cx="0"
+       cy="0" />
+    <text
+       xml:space="preserve"
+       id="noteAbsolute"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:8px;font-family:'Courier New';-inkscape-font-specification:'Courier New, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect4-9-2);display:inline;opacity:0.643;fill:none;stroke:#000000;stroke-width:0.37;stroke-dasharray:none;stroke-opacity:1"
+       inkscape:label="noteAbsolute"
+       transform="translate(-222.19,-253.0168)"><tspan
+         x="226.53125"
+         y="95.352596"
+         id="tspan18">Abs</tspan></text>
+    <text
+       xml:space="preserve"
+       id="noteRelative"
+       style="font-size:8px;font-family:'Courier New';-inkscape-font-specification:'Courier New, Normal';text-align:start;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect4);display:inline;opacity:0.643;fill:none;stroke:#000000;stroke-width:0.37;stroke-dasharray:none;stroke-opacity:1"
+       inkscape:label="noteRelative"
+       transform="translate(-252.5,-252.5)"><tspan
+         x="226.53125"
+         y="95.352596"
+         id="tspan19">Rel</tspan></text>
+  </g>
+  <circle
+     r="250"
+     opacity="0"
+     id="circle1"
+     cx="0"
+     cy="0"
+     style="display:inline" />
+  <g
+     id="compassLayer"
+     style="display:inline">
+    <g
+       id="scale"
+       fill="none"
+       stroke="#000000"
+       stroke-linecap="round">
+      <path
+         id="deg10"
+         d="m 0,-250 v 30 m 0,440 v 30 M -250,0 h 30 m 440,0 h 30"
+         style="stroke-width:0.9;stroke-dasharray:none" />
+      <path
+         id="deg5"
+         transform="rotate(5)"
+         d="m 0,-250 v 20 m 0,460 v 20 M -250,0 h 20 m 460,0 h 20"
+         style="stroke-width:0.9;stroke-dasharray:none" />
+      <path
+         id="deg1"
+         transform="rotate(1)"
+         d="m 0,-250 v 10 m 0,480 v 10 M -250,0 h 10 m 480,0 h 10"
+         style="stroke-width:0.64;stroke-dasharray:none" />
+      <use
+         xlink:href="#deg1"
+         transform="rotate(1)"
+         id="use1" />
+      <use
+         xlink:href="#deg1"
+         transform="rotate(2)"
+         id="use2" />
+      <use
+         xlink:href="#deg1"
+         transform="rotate(3)"
+         id="use3" />
+      <use
+         xlink:href="#deg1"
+         transform="rotate(5)"
+         id="use4" />
+      <use
+         xlink:href="#deg1"
+         transform="rotate(6)"
+         id="use5" />
+      <use
+         xlink:href="#deg1"
+         transform="rotate(7)"
+         id="use6" />
+      <use
+         xlink:href="#deg1"
+         transform="rotate(8)"
+         id="use7" />
+    </g>
+    <use
+       xlink:href="#scale"
+       transform="rotate(10)"
+       id="use8" />
+    <use
+       xlink:href="#scale"
+       transform="rotate(20)"
+       id="use9" />
+    <use
+       xlink:href="#scale"
+       transform="rotate(30)"
+       id="use10" />
+    <use
+       xlink:href="#scale"
+       transform="rotate(40)"
+       id="use11" />
+    <use
+       xlink:href="#scale"
+       transform="rotate(50)"
+       id="use12" />
+    <use
+       xlink:href="#scale"
+       transform="rotate(60)"
+       id="use13" />
+    <use
+       xlink:href="#scale"
+       transform="rotate(70)"
+       id="use14" />
+    <use
+       xlink:href="#scale"
+       transform="rotate(80)"
+       id="use15" />
+  </g>
+  <g
+     style="font-style:normal;font-weight:normal;line-height:0%;font-family:'Bitstream Vera Sans';text-align:center;writing-mode:lr-tb;text-anchor:middle;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     id="scaleLayer">
+    <g
+       id="outer_scale">
+      <text
+         y="-206"
+         id="text18">0</text>
+      <text
+         y="-206"
+         transform="rotate(10)"
+         id="text19">10</text>
+      <text
+         y="-206"
+         transform="rotate(20)"
+         id="text20">20</text>
+      <text
+         y="-206"
+         transform="rotate(30)"
+         id="text21">30</text>
+      <text
+         y="-206"
+         transform="rotate(40)"
+         id="text22">40</text>
+      <text
+         y="-206"
+         transform="rotate(50)"
+         id="text23">50</text>
+      <text
+         y="-206"
+         transform="rotate(60)"
+         id="text24">60</text>
+      <text
+         y="-206"
+         transform="rotate(70)"
+         id="text25">70</text>
+      <text
+         y="-206"
+         transform="rotate(80)"
+         id="text26">80</text>
+      <text
+         y="-206"
+         transform="rotate(90)"
+         id="text27">90</text>
+      <text
+         y="-206"
+         transform="rotate(100)"
+         id="text28">100</text>
+      <text
+         y="-206"
+         transform="rotate(110)"
+         id="text29">110</text>
+      <text
+         y="-206"
+         transform="rotate(120)"
+         id="text30">120</text>
+      <text
+         y="-206"
+         transform="rotate(130)"
+         id="text31">130</text>
+      <text
+         y="-206"
+         transform="rotate(140)"
+         id="text32">140</text>
+      <text
+         y="-206"
+         transform="rotate(150)"
+         id="text33">150</text>
+      <text
+         y="-206"
+         transform="rotate(160)"
+         id="text34">160</text>
+      <text
+         y="-206"
+         transform="rotate(170)"
+         id="text35">170</text>
+      <text
+         y="-206"
+         transform="scale(-1)"
+         id="text36">180</text>
+      <text
+         y="-206"
+         transform="rotate(-170)"
+         id="text37">190</text>
+      <text
+         y="-206"
+         transform="rotate(-160)"
+         id="text38">200</text>
+      <text
+         y="-206"
+         transform="rotate(-150)"
+         id="text39">210</text>
+      <text
+         y="-206"
+         transform="rotate(-140)"
+         id="text40">220</text>
+      <text
+         y="-206"
+         transform="rotate(-130)"
+         id="text41">230</text>
+      <text
+         y="-206"
+         transform="rotate(-120)"
+         id="text42">240</text>
+      <text
+         y="-206"
+         transform="rotate(-110)"
+         id="text43">250</text>
+      <text
+         y="-206"
+         transform="rotate(-100)"
+         id="text44">260</text>
+      <text
+         y="-206"
+         transform="rotate(-90)"
+         id="text45">270</text>
+      <text
+         y="-206"
+         transform="rotate(-80)"
+         id="text46">280</text>
+      <text
+         y="-206"
+         transform="rotate(-70)"
+         id="text47">290</text>
+      <text
+         y="-206"
+         transform="rotate(-60)"
+         id="text48">300</text>
+      <text
+         y="-206"
+         transform="rotate(-50)"
+         id="text49">310</text>
+      <text
+         y="-206"
+         transform="rotate(-40)"
+         id="text50">320</text>
+      <text
+         y="-206"
+         transform="rotate(-30)"
+         id="text51">330</text>
+      <text
+         y="-206"
+         transform="rotate(-20)"
+         id="text52">340</text>
+      <text
+         y="-206"
+         transform="rotate(-10)"
+         id="text53">350</text>
+    </g>
+    <use
+       xlink:href="#outer_scale"
+       transform="matrix(-0.90532362,0,0,-0.90532362,-1.6208091e-4,6.4832362e-4)"
+       id="inner_scale" />
+  </g>
+  <g
+     id="buttonLayer"
+     transform="translate(-112.63941,-5.0061959)"
+     style="display:inline;stroke:#000000;stroke-opacity:1">
+    <g
+       id="buttonArrowHardRight"
+       transform="matrix(-0.62797955,0,0,0.6653041,216.58155,-116.39188)"
+       onclick="rotateArrowLayer(+5)"
+       onmouseover=""
+       style="stroke:#000000;stroke-opacity:1">
+      <rect
+         style="opacity:0.44;fill:#00ffff;stroke:#000000;stroke-width:0.936059;stroke-opacity:1"
+         id="rect1-8-4"
+         width="30.795567"
+         height="29.387966"
+         x="221.60876"
+         y="-304.49646"
+         transform="rotate(90)"
+         inkscape:transform-center-x="1.4909625"
+         inkscape:transform-center-y="0.2981925" />
+      <g
+         id="g30-3"
+         transform="matrix(1.6081202,0,0,1.6081202,159.87259,328.81105)"
+         style="stroke:#000000;stroke-opacity:1">
+        <path
+           style="opacity:0.44;fill:#0000ff;stroke:#000000;stroke-width:1.3;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#ArrowWideRounded-61)"
+           d="m 76.927196,-57.055976 h 3.934895"
+           id="path30-1" />
+        <path
+           style="opacity:0.44;fill:#0000ff;stroke:#000000;stroke-width:1.3;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#ArrowWideRounded-6-2)"
+           d="m 81.629152,-57.106769 h 3.93489"
+           id="path30-7-2" />
+      </g>
+    </g>
+    <g
+       id="buttonArrowHardRight-9"
+       transform="matrix(-0.62797955,0,0,0.6653041,195.84811,-116.39188)"
+       onclick="rotateArrowLayer(+1)"
+       onmouseover=""
+       inkscape:label="buttonArrowRight"
+       style="stroke:#000000;stroke-opacity:1">
+      <rect
+         style="opacity:0.44;fill:#00ffff;stroke:#000000;stroke-width:0.936059;stroke-opacity:1"
+         id="rect1-8-4-5"
+         width="30.795567"
+         height="29.387966"
+         x="221.60876"
+         y="-304.49646"
+         transform="rotate(90)"
+         inkscape:transform-center-x="1.4909625"
+         inkscape:transform-center-y="0.2981925" />
+      <g
+         id="g30-3-4"
+         transform="matrix(1.6081202,0,0,1.6081202,159.87259,328.81105)"
+         style="stroke:#000000;stroke-opacity:1">
+        <path
+           style="opacity:0.44;fill:#0000ff;stroke:#000000;stroke-width:1.3;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#ArrowWideRounded-61-1)"
+           d="m 76.927196,-57.055976 h 3.934895"
+           id="path30-1-3" />
+      </g>
+    </g>
+    <g
+       id="buttonArrowHardRight-9-1"
+       transform="matrix(-0.37086113,0,0,0.34903638,109.84582,-23.711771)"
+       onclick="rotateArrowLayer(+0.5)"
+       onmouseover=""
+       inkscape:label="buttonArrowRightHalf"
+       style="display:inline;stroke:#000000;stroke-opacity:1">
+      <rect
+         style="opacity:0.44;fill:#00ffff;stroke:#000000;stroke-width:0.936059;stroke-opacity:1"
+         id="rect1-8-4-5-4"
+         width="30.795567"
+         height="29.387966"
+         x="221.60876"
+         y="-304.49646"
+         transform="rotate(90)"
+         inkscape:transform-center-x="1.4909625"
+         inkscape:transform-center-y="0.2981925" />
+      <g
+         id="g30-3-4-2"
+         transform="matrix(1.6081202,0,0,1.6081202,159.87259,328.81105)"
+         style="stroke:#000000;stroke-opacity:1">
+        <path
+           style="opacity:0.44;fill:#0000ff;stroke:#000000;stroke-width:1.3;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#ArrowWideRounded-61-1-7)"
+           d="m 76.927196,-57.055976 h 3.934895"
+           id="path30-1-3-32" />
+      </g>
+    </g>
+    <g
+       id="buttonArrowLeft"
+       transform="matrix(0.62797955,0,0,0.6653041,-206.85597,-116.39188)"
+       onclick="rotateArrowLayer(-1)"
+       onmouseover=""
+       inkscape:label="buttonArrowLeft"
+       style="stroke:#000000;stroke-opacity:1">
+      <rect
+         style="opacity:0.44;fill:#00ffff;stroke:#000000;stroke-width:0.936059;stroke-opacity:1"
+         id="rect1-8-4-5-1"
+         width="30.795567"
+         height="29.387966"
+         x="221.60876"
+         y="-304.49646"
+         transform="rotate(90)"
+         inkscape:transform-center-x="1.4909625"
+         inkscape:transform-center-y="0.2981925" />
+      <g
+         id="g30-3-4-1"
+         transform="matrix(1.6081202,0,0,1.6081202,159.87259,328.81105)"
+         style="stroke:#000000;stroke-opacity:1">
+        <path
+           style="opacity:0.44;fill:#0000ff;stroke:#000000;stroke-width:1.3;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#ArrowWideRounded-61-1-3)"
+           d="m 76.927196,-57.055976 h 3.934895"
+           id="path30-1-3-3" />
+      </g>
+    </g>
+    <g
+       id="buttonArrowLeft-8"
+       transform="matrix(0.38138191,0,0,0.34889648,-124.21874,-23.678636)"
+       onclick="rotateArrowLayer(-0.5)"
+       onmouseover=""
+       inkscape:label="buttonArrowLeftHalf"
+       style="display:inline;stroke:#000000;stroke-opacity:1">
+      <rect
+         style="opacity:0.44;fill:#00ffff;stroke:#000000;stroke-width:0.936059;stroke-opacity:1"
+         id="rect1-8-4-5-1-8"
+         width="30.795567"
+         height="29.387966"
+         x="221.60876"
+         y="-304.49646"
+         transform="rotate(90)"
+         inkscape:transform-center-x="1.4909625"
+         inkscape:transform-center-y="0.2981925" />
+      <g
+         id="g30-3-4-1-2"
+         transform="matrix(1.6081202,0,0,1.6081202,159.87259,328.81105)"
+         style="stroke:#000000;stroke-opacity:1">
+        <path
+           style="opacity:0.44;fill:#0000ff;stroke:#000000;stroke-width:1.3;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#ArrowWideRounded-61-1-3-9)"
+           d="m 76.927196,-57.055976 h 3.934895"
+           id="path30-1-3-3-4" />
+      </g>
+    </g>
+    <g
+       id="buttonArrowHardLeft"
+       transform="matrix(0.62797955,0,0,0.6653041,-227.58941,-116.39188)"
+       onclick="rotateArrowLayer(-5)"
+       onmouseover=""
+       inkscape:label="buttonArrowHardLeft"
+       style="stroke:#000000;stroke-opacity:1">
+      <rect
+         style="opacity:0.44;fill:#00ffff;stroke:#000000;stroke-width:0.936059;stroke-opacity:1"
+         id="rect1-8-4-1"
+         width="30.795567"
+         height="29.387966"
+         x="221.60876"
+         y="-304.49646"
+         transform="rotate(90)"
+         inkscape:transform-center-x="1.4909625"
+         inkscape:transform-center-y="0.2981925" />
+      <g
+         id="g30-3-68"
+         transform="matrix(1.6081202,0,0,1.6081202,159.87259,328.81105)"
+         style="stroke:#000000;stroke-opacity:1">
+        <path
+           style="opacity:0.44;fill:#0000ff;stroke:#000000;stroke-width:1.3;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#ArrowWideRounded-61-4)"
+           d="m 76.927196,-57.055976 h 3.934895"
+           id="path30-1-5" />
+        <path
+           style="opacity:0.44;fill:#0000ff;stroke:#000000;stroke-width:1.3;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#ArrowWideRounded-6-2-3)"
+           d="m 81.629152,-57.106769 h 3.93489"
+           id="path30-7-2-7" />
+      </g>
+    </g>
+    <g
+       id="buttonRotatePlateHardRight"
+       transform="matrix(-0.64862973,0,0,0.6850104,452.6771,-120.77935)"
+       onclick="rotatePlate(+5)"
+       style="fill:#00ff00;stroke:#000000;stroke-opacity:1">
+      <rect
+         style="opacity:0.44;fill:#00ff00;stroke:#000000;stroke-width:0.936059;stroke-opacity:1"
+         id="rect1-8-4-7"
+         width="30.795567"
+         height="29.387966"
+         x="221.60876"
+         y="-304.49646"
+         transform="rotate(90)"
+         inkscape:transform-center-x="1.4909625"
+         inkscape:transform-center-y="0.2981925" />
+      <g
+         id="g30-3-6"
+         transform="matrix(1.6081202,0,0,1.6081202,159.87259,328.81105)"
+         style="fill:#00ff00;stroke:#000000;stroke-opacity:1">
+        <path
+           style="opacity:0.44;fill:#00ff00;stroke:#000000;stroke-width:1.3;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#ArrowWideRounded-61-0)"
+           d="m 76.927196,-57.055976 h 3.934895"
+           id="path30-1-1" />
+        <path
+           style="opacity:0.44;fill:#00ff00;stroke:#000000;stroke-width:1.3;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#ArrowWideRounded-6-2-4)"
+           d="m 81.629152,-57.106769 h 3.93489"
+           id="path30-7-2-8" />
+      </g>
+    </g>
+    <g
+       id="buttonRotatePlateRight"
+       transform="matrix(-0.64862973,0,0,0.6850104,432.20599,-120.77935)"
+       onclick="rotatePlate(+1)"
+       style="fill:#00ff00;stroke:#000000;stroke-opacity:1"
+       inkscape:label="buttonRotatePlateRight">
+      <rect
+         style="opacity:0.44;fill:#00ff00;stroke:#000000;stroke-width:0.936059;stroke-opacity:1"
+         id="rect1-8-4-7-9"
+         width="30.795567"
+         height="29.387966"
+         x="221.60876"
+         y="-304.49646"
+         transform="rotate(90)"
+         inkscape:transform-center-x="1.4909625"
+         inkscape:transform-center-y="0.2981925" />
+      <g
+         id="g30-3-6-3"
+         transform="matrix(1.6081202,0,0,1.6081202,159.87259,328.81105)"
+         style="fill:#00ff00;stroke:#000000;stroke-opacity:1">
+        <path
+           style="opacity:0.44;fill:#00ff00;stroke:#000000;stroke-width:1.3;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#ArrowWideRounded-61-0-7)"
+           d="m 76.927196,-57.055976 h 3.934895"
+           id="path30-1-1-1" />
+      </g>
+    </g>
+    <g
+       id="buttonRotatePlateRight-2"
+       transform="matrix(-0.39904445,0,0,0.38372951,349.34872,-30.972057)"
+       onclick="rotatePlate(+0.5)"
+       style="display:inline;fill:#00ff00;stroke:#000000;stroke-opacity:1"
+       inkscape:label="buttonRotatePlateRightHalf">
+      <rect
+         style="opacity:0.44;fill:#00ff00;stroke:#000000;stroke-width:0.936059;stroke-opacity:1"
+         id="rect1-8-4-7-9-7"
+         width="30.795567"
+         height="29.387966"
+         x="221.54665"
+         y="-304.49646"
+         transform="rotate(90)"
+         inkscape:transform-center-x="1.4909625"
+         inkscape:transform-center-y="0.2981925" />
+      <g
+         id="g30-3-6-3-9"
+         transform="matrix(1.6081202,0,0,1.6081202,159.87259,328.81105)"
+         style="fill:#00ff00;stroke:#000000;stroke-opacity:1">
+        <path
+           style="opacity:0.44;fill:#00ff00;stroke:#000000;stroke-width:1.3;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#ArrowWideRounded-61-0-7-8)"
+           d="m 76.927196,-57.055976 h 3.934895"
+           id="path30-1-1-1-5" />
+      </g>
+    </g>
+    <g
+       id="buttonRotatePlateLeft"
+       transform="matrix(0.64862973,0,0,0.6850104,18.35163,-120.77935)"
+       onclick="rotatePlate(-1)"
+       style="fill:#00ff00;stroke:#000000;stroke-opacity:1"
+       inkscape:label="buttonRotatePlateLeft">
+      <rect
+         style="opacity:0.44;fill:#00ff00;stroke:#000000;stroke-width:0.936059;stroke-opacity:1"
+         id="rect1-8-4-7-9-2"
+         width="30.795567"
+         height="29.387966"
+         x="221.60876"
+         y="-304.49646"
+         transform="rotate(90)"
+         inkscape:transform-center-x="1.4909625"
+         inkscape:transform-center-y="0.2981925" />
+      <g
+         id="g30-3-6-3-8"
+         transform="matrix(1.6081202,0,0,1.6081202,159.87259,328.81105)"
+         style="fill:#00ff00;stroke:#000000;stroke-opacity:1">
+        <path
+           style="opacity:0.44;fill:#00ff00;stroke:#000000;stroke-width:1.3;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#ArrowWideRounded-61-0-7-6)"
+           d="m 76.927196,-57.055976 h 3.934895"
+           id="path30-1-1-1-6" />
+      </g>
+    </g>
+    <g
+       id="buttonRotatePlateLeft-8"
+       transform="matrix(0.40153719,0,0,0.38870129,100.90968,-32.095261)"
+       onclick="rotatePlate(-0.5)"
+       style="display:inline;fill:#00ff00;stroke:#000000;stroke-opacity:1"
+       inkscape:label="buttonRotatePlateLeftHalf">
+      <rect
+         style="opacity:0.44;fill:#00ff00;stroke:#000000;stroke-width:0.93655;stroke-dasharray:none;stroke-opacity:1"
+         id="rect1-8-4-7-9-2-5"
+         width="30.795567"
+         height="29.387966"
+         x="221.60876"
+         y="-304.49646"
+         transform="rotate(90)"
+         inkscape:transform-center-x="1.4909625"
+         inkscape:transform-center-y="0.2981925" />
+      <g
+         id="g30-3-6-3-8-7"
+         transform="matrix(1.6081202,0,0,1.6081202,159.87259,328.81105)"
+         style="fill:#00ff00;stroke:#000000;stroke-opacity:1">
+        <path
+           style="opacity:0.44;fill:#00ff00;stroke:#000000;stroke-width:1.3;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#ArrowWideRounded-61-0-7-6-1)"
+           d="m 76.927196,-57.055976 h 3.934895"
+           id="path30-1-1-1-6-6" />
+      </g>
+    </g>
+    <g
+       id="buttonRotatePlateHardRight-1"
+       transform="matrix(0.64862973,0,0,0.6850104,-2.1194804,-120.77935)"
+       onclick="rotatePlate(-5)"
+       style="fill:#00ff00;stroke:#000000;stroke-opacity:1"
+       inkscape:label="buttonRotatePlateHardLeft">
+      <rect
+         style="opacity:0.44;fill:#00ff00;stroke:#000000;stroke-width:0.936059;stroke-opacity:1"
+         id="rect1-8-4-7-5"
+         width="30.795567"
+         height="29.387966"
+         x="221.60876"
+         y="-304.49646"
+         transform="rotate(90)"
+         inkscape:transform-center-x="1.4909625"
+         inkscape:transform-center-y="0.2981925" />
+      <g
+         id="g30-3-6-2"
+         transform="matrix(1.6081202,0,0,1.6081202,159.87259,328.81105)"
+         style="fill:#00ff00;stroke:#000000;stroke-opacity:1">
+        <path
+           style="opacity:0.44;fill:#00ff00;stroke:#000000;stroke-width:1.3;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#ArrowWideRounded-61-0-5)"
+           d="m 76.927196,-57.055976 h 3.934895"
+           id="path30-1-1-7" />
+        <path
+           style="opacity:0.44;fill:#00ff00;stroke:#000000;stroke-width:1.3;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#ArrowWideRounded-6-2-4-7)"
+           d="m 81.629152,-57.106769 h 3.93489"
+           id="path30-7-2-8-6" />
+      </g>
+    </g>
+    <g
+       id="g17">
+      <text
+         xml:space="preserve"
+         id="text16"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:8px;font-family:'Courier New';-inkscape-font-specification:'Courier New, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect16);display:inline;opacity:0.643;fill:none;stroke:#000000;stroke-width:0.37;stroke-dasharray:none;stroke-opacity:1"
+         transform="translate(-137.64814,-247.4938)"><tspan
+           x="129.53516"
+           y="291.21978"
+           id="tspan20">0</tspan></text>
+      <rect
+         style="fill:#00ffff;fill-opacity:0.439216;stroke:#000000;stroke-width:1.3;stroke-opacity:1"
+         id="buttonResetArrows"
+         width="15"
+         height="15"
+         x="-13.003936"
+         y="33.789547"
+         onclick="resetArrows()" />
+    </g>
+    <g
+       id="g16">
+      <text
+         xml:space="preserve"
+         id="text14"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:8px;font-family:'Courier New';-inkscape-font-specification:'Courier New, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect14);display:inline;opacity:0.643;fill:none;stroke:#000000;stroke-width:0.37;stroke-dasharray:none;stroke-opacity:1"
+         transform="translate(-137.98327,-247.41558)"><tspan
+           x="360.44531"
+           y="291.21978"
+           id="tspan21">0</tspan></text>
+      <rect
+         style="fill:#00ff00;fill-opacity:0.439216;stroke:#000000;stroke-width:1.63218;stroke-opacity:1"
+         id="buttonResetPlate"
+         width="15"
+         height="15"
+         x="217.77881"
+         y="34.072598"
+         onclick="resetPlate()" />
+    </g>
+  </g>
+  <g
+     id="indicatorLayer"
+     transform="translate(-0.62577447,5.0061958)">
+    <text
+       xml:space="preserve"
+       id="textN"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12px;font-family:'Courier New';-inkscape-font-specification:'Courier New, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect3);display:inline;fill:#99ff55;stroke:#000000;stroke-width:1.3"
+       transform="translate(-529.96039,-170.38428)"
+       inkscape:label="textN"><tspan
+         x="519.75"
+         y="26.259362"
+         id="tspan22">000.0</tspan></text>
+    <text
+       xml:space="preserve"
+       id="textS"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12px;font-family:'Courier New';-inkscape-font-specification:'Courier New, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect3-2);display:inline;fill:#99ff55;stroke:#000000;stroke-width:1.3"
+       transform="translate(-530.27386,118.62449)"
+       inkscape:label="textS"><tspan
+         x="519.75"
+         y="26.259362"
+         id="tspan23">000.0</tspan></text>
+    <text
+       xml:space="preserve"
+       id="textSW"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12px;font-family:'Courier New';-inkscape-font-specification:'Courier New, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect3-2);display:inline;fill:#99ff55;stroke:#000000;stroke-width:1.3"
+       transform="translate(-631.80053,73.916833)"
+       inkscape:label="textSW"><tspan
+         x="519.75"
+         y="26.259362"
+         id="tspan24">000.0</tspan></text>
+    <text
+       xml:space="preserve"
+       id="textW"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12px;font-family:'Courier New';-inkscape-font-specification:'Courier New, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect3-8);display:inline;fill:#99ff55;stroke:#000000;stroke-width:1.3"
+       transform="translate(-686.3656,-27.598658)"
+       inkscape:label="textW"
+       inkscape:transform-center-x="-0.62577447"
+       inkscape:transform-center-y="1.2515489"><tspan
+         x="519.75"
+         y="26.259362"
+         id="tspan25">000.0</tspan></text>
+    <text
+       xml:space="preserve"
+       id="textNW"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12px;font-family:'Courier New';-inkscape-font-specification:'Courier New, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect3-1);display:inline;fill:#99ff55;stroke:#000000;stroke-width:1.3"
+       transform="translate(-629.05209,-127.08316)"
+       inkscape:label="textNW"><tspan
+         x="519.75"
+         y="26.259362"
+         id="tspan26">000.0</tspan></text>
+    <text
+       xml:space="preserve"
+       id="textSE"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12px;font-family:'Courier New';-inkscape-font-specification:'Courier New, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect3-57);display:inline;fill:#99ff55;stroke:#000000;stroke-width:1.3"
+       transform="translate(-429.17477,73.929223)"
+       inkscape:label="textSE"><tspan
+         x="519.75"
+         y="26.259362"
+         id="tspan27">000.0</tspan></text>
+    <text
+       xml:space="preserve"
+       id="textE"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12px;font-family:'Courier New';-inkscape-font-specification:'Courier New, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect3-5);display:inline;fill:#99ff55;stroke:#000000;stroke-width:1.3"
+       transform="translate(-384.90463,-27.586266)"
+       inkscape:label="textE"><tspan
+         x="519.75"
+         y="26.259362"
+         id="tspan28">000.0</tspan></text>
+    <text
+       xml:space="preserve"
+       id="textNE"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12px;font-family:'Courier New';-inkscape-font-specification:'Courier New, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect3-7);display:inline;fill:#99ff55;stroke:#000000;stroke-width:1.3"
+       transform="translate(-433.56757,-124.20584)"
+       inkscape:label="textNE"><tspan
+         x="519.75"
+         y="26.259362"
+         id="tspan29">000.0</tspan></text>
+  </g>
+  <g
+     fill="#000000"
+     stroke="#000000"
+     id="g15"
+     style="display:inline"
+     transform="matrix(0.4077717,0,0,0.4077717,-0.41311,-0.41311)">
+    <path
+       d="M 0,-65 155,-155 65,0 155,155 0,65 -155,155 -65,0 -155,-155 Z"
+       fill="#ffffff"
+       id="path12" />
+    <path
+       d="M 0,0 V -65 L 155,-155 -155,155 0,65 V 0 H -65 L -155,-155 155,155 65,0 Z"
+       id="path13" />
+    <path
+       d="M 45,-45 0,-300 -45,-45 -300,0 -45,45 0,300 45,45 300,0 Z"
+       fill="#ffffff"
+       id="path14" />
+    <path
+       d="M 0,0 -45,-45 0,-300 V 300 L 45,45 0,0 H -300 L -45,45 45,-45 300,0 Z"
+       id="path15" />
+  </g>
+  <ellipse
+     style="display:none;opacity:0.52;fill:#00ffff;fill-opacity:1;stroke:#000000;stroke-width:0.66288"
+     id="path1"
+     cx="-2.5030885"
+     cy="1.2515568"
+     sodipodi:insensitive="true"
+     rx="150.48399"
+     ry="150.48431" />
+</svg>
+
+</body>
+</html>
